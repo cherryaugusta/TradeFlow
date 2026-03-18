@@ -1,0 +1,101 @@
+services:
+  db:
+    image: postgres:17
+    container_name: tradeflow-db
+    environment:
+      POSTGRES_DB: tradeflow
+      POSTGRES_USER: tradeflow
+      POSTGRES_PASSWORD: tradeflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - tradeflow_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tradeflow -d tradeflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7
+    container_name: tradeflow-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend
+    container_name: tradeflow-backend
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      python manage.py shell -c \"from django.contrib.auth import get_user_model; from market.seed_scheduler import seed_periodic_task; seed_periodic_task(); User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123456')\" &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery_worker:
+    build:
+      context: ./backend
+    container_name: tradeflow-celery-worker
+    command: celery -A config worker -l info
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  celery_beat:
+    build:
+      context: ./backend
+    container_name: tradeflow-celery-beat
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tradeflow-frontend
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  tradeflow_postgres_data:
