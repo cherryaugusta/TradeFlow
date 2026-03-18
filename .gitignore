@@ -1,11 +1,15 @@
-# OS / editors
+# =========================
+# OS / Editors
+# =========================
 .DS_Store
 Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *.pyo
@@ -20,19 +24,30 @@ htmlcov/
 backend/.venv/
 backend/staticfiles/
 
-# Backend env
+# =========================
+# Backend environment
+# =========================
 backend/.env
 
-# Node
+# =========================
+# Node / Frontend
+# =========================
 frontend/node_modules/
 frontend/dist/
 frontend/.env
+frontend/tsconfig.tsbuildinfo
 
-# Docker
+# =========================
+# Docker / Runtime
+# =========================
 *.pid
 
+# =========================
 # Screenshots temp
+# =========================
 screenshots/.tmp/
 
+# =========================
 # Misc
+# =========================
 .env
