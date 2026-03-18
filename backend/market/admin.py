@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import Exchange, Asset, PriceSnapshot, ArbitrageOpportunity
 
-# Register your models here.
+admin.site.register(Exchange)
+admin.site.register(Asset)
+admin.site.register(PriceSnapshot)
+admin.site.register(ArbitrageOpportunity)
