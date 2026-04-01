@@ -2,6 +2,12 @@
 
 Multi-source crypto/stock arbitrage tracker built with React, TypeScript, Django, Django REST Framework, PostgreSQL, Redis, Celery, django-celery-beat, and Docker Compose.
 
+## Overview
+
+TradeFlow is a full-stack market monitoring application that simulates scheduled price ingestion from multiple exchanges and exposes arbitrage opportunities through a live dashboard. The backend ingests mock exchange prices on a fixed schedule, stores historical snapshots in PostgreSQL, computes current arbitrage spreads, and serves analytics through Django REST Framework APIs. The frontend renders this data in a sortable React dashboard with automatic refresh and visual change highlighting.
+
+This repository is designed to demonstrate backend scheduling, asynchronous task execution, API-first delivery, reproducible local infrastructure, and typed frontend integration in a portfolio-ready form.
+
 ## Highlights
 
 - Polls 3 mock exchanges every 5 seconds with Celery Beat
@@ -13,6 +19,19 @@ Multi-source crypto/stock arbitrage tracker built with React, TypeScript, Django
 - Custom Django middleware that logs request latency
 - Full Docker Compose stack for local development
 
+## Why This Project Matters
+
+TradeFlow is a strong engineering portfolio project because it demonstrates:
+
+- scheduled ingestion with Celery Beat
+- asynchronous worker execution with Celery
+- relational persistence with PostgreSQL
+- API-first backend delivery with Django REST Framework
+- OpenAPI documentation with drf-spectacular
+- strict TypeScript frontend integration
+- reproducible full-stack startup with Docker Compose
+- observable request handling through custom latency logging
+
 ## Stack
 
 - Frontend: React, TypeScript, Vite, TanStack Table
@@ -21,12 +40,25 @@ Multi-source crypto/stock arbitrage tracker built with React, TypeScript, Django
 - Queue / Scheduler: Redis, Celery, django-celery-beat
 - Containers: Docker Compose
 
+## Key Capabilities
+
+- scheduled polling of mock market data
+- storage of historical price snapshots
+- computation of latest arbitrage opportunities
+- hourly spread analytics endpoint
+- sortable live dashboard with periodic refresh
+- row-change flash effect for improved visual feedback
+- local admin visibility through Django admin
+- local API inspection through Swagger UI
+- containerized service orchestration for reproducible setup
+
 ## Project Structure
 
 ```text
 TradeFlow/
 ├── .gitignore
 ├── README.md
+├── LICENSE
 ├── docker-compose.yml
 ├── backend/
 │   ├── .dockerignore
@@ -99,12 +131,41 @@ TradeFlow is a local full-stack application that simulates a market data ingesti
 3. The UI refreshes automatically every 5 seconds.
 4. Updated rows briefly flash green to highlight changes.
 
+## Runtime Services
+
+The Docker Compose stack starts these services:
+
+* `tradeflow-db`
+* `tradeflow-redis`
+* `tradeflow-backend`
+* `tradeflow-celery-worker`
+* `tradeflow-celery-beat`
+* `tradeflow-frontend`
+
 ## Local Run
 
-From the project root:
+Run from the project root:
 
 ```bash
 docker compose up --build -d
+```
+
+Check service health:
+
+```bash
+docker compose ps
+```
+
+Stop the stack:
+
+```bash
+docker compose down
+```
+
+If a command hangs and you need to stop it, press:
+
+```text
+CTRL + C
 ```
 
 ## Local URLs
@@ -118,19 +179,12 @@ docker compose up --build -d
 
 ## Admin Login
 
+Local admin credentials for this development setup:
+
 * Username: `admin`
 * Password: `admin123456`
 
-## Services
-
-The Docker Compose stack starts these services:
-
-* `tradeflow-db`
-* `tradeflow-redis`
-* `tradeflow-backend`
-* `tradeflow-celery-worker`
-* `tradeflow-celery-beat`
-* `tradeflow-frontend`
+These credentials are intended only for local development and demonstration.
 
 ## API Endpoints
 
@@ -145,14 +199,16 @@ The Docker Compose stack starts these services:
 * `GET /api/docs/`
 * `GET /api/schema/`
 
-## Development Notes
+## Engineering Notes
 
 * Python host version kept at `3.13.12`
 * Backend Docker image uses `python:3.13-slim`
 * Node host version kept at `v24.13.0`
 * Frontend is built with strict TypeScript enabled
-* Backend runtime is containerized, while local Python virtual environment is used for package installation and migration generation
-* The backend `.env` and frontend `.env` are ignored by Git
+* Backend runtime is containerized, while a local Python virtual environment can be used for dependency installation and migration generation
+* Backend `.env` and frontend `.env` are ignored by Git
+* Request latency logging is implemented through custom Django middleware
+* Scheduled task seeding is handled by application logic so the periodic job is available automatically
 
 ## Verification Checklist
 
@@ -209,18 +265,16 @@ D:\Projects\TradeFlow
 ```
 
 ```powershell
-git init
-git branch -M main
 docker compose up --build -d
 docker compose ps
 docker compose logs backend --tail 100
 docker compose logs celery_worker --tail 100
 docker compose logs celery_beat --tail 100
 docker compose logs frontend --tail 100
+git status
 git add .
 git commit -m "message"
-git remote add origin https://github.com/YOUR_GITHUB_USERNAME/TradeFlow.git
-git push -u origin main
+git push
 ```
 
 ### Backend directory
@@ -240,6 +294,13 @@ pip freeze > requirements.txt
 django-admin startproject config .
 python manage.py startapp market
 python manage.py makemigrations
+python manage.py migrate
+```
+
+To leave the virtual environment:
+
+```powershell
+deactivate
 ```
 
 ### Frontend directory
@@ -257,19 +318,13 @@ npm run build
 npm run dev
 ```
 
-## Atomic Commit Sequence
+## Suggested Repository Metadata
 
-```text
-chore: initialize repository and root gitignore
-feat: scaffold Django backend with virtual environment dependencies
-feat: add Django settings middleware and API docs configuration
-feat: add market domain models serializers and API endpoints
-feat: add Celery tasks for mock exchange polling
-feat: add Docker Compose stack for Django Postgres Redis and Celery
-feat: scaffold React TypeScript frontend with strict mode
-feat: add arbitrage dashboard with TanStack Table and flash effect
-docs: add README with architecture usage and screenshot evidence
-```
+For a stronger GitHub presentation, configure the repository with:
+
+* **repository name:** `TradeFlow`
+* **description:** `Multi-source arbitrage tracker with Django, DRF, Celery, Redis, PostgreSQL, React, TypeScript, and Docker Compose`
+* **topics:** `django`, `djangorestframework`, `celery`, `redis`, `postgresql`, `react`, `typescript`, `vite`, `docker-compose`, `openapi`, `tanstack-table`, `finance`, `arbitrage`, `analytics`
 
 ## Why This Repository Is Strong
 
@@ -289,7 +344,6 @@ TradeFlow is submission-ready when all of the following are true:
 
 * folder structure matches the target structure
 * local repository exists and uses `main`
-* all nine commits exist in the intended order
 * Docker Compose starts six services
 * backend endpoints work
 * admin login works
@@ -297,3 +351,26 @@ TradeFlow is submission-ready when all of the following are true:
 * flash effect is captured in a screenshot
 * README renders images on GitHub
 * repository is pushed to GitHub
+
+## Notes on Secrets
+
+Do not commit:
+
+* `backend/.env`
+* `frontend/.env`
+* real API keys
+* personal credentials
+
+Keep environment-specific values local and provide safe templates where needed.
+
+## Summary
+
+TradeFlow is a portfolio-grade full-stack application that demonstrates scheduled market ingestion, asynchronous processing, arbitrage analytics, API-first backend delivery, and a typed frontend dashboard in a reproducible Docker-based setup.
+
+## License
+
+This project is licensed under the MIT License.
+
+Copyright (c) 2026 Cherry Augusta
+
+See the [LICENSE](./LICENSE) file for full details.
