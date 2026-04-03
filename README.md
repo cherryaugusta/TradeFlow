@@ -371,6 +371,4 @@ TradeFlow is a portfolio-grade full-stack application that demonstrates schedule
 
 This project is licensed under the MIT License.
 
-Copyright (c) 2026 Cherry Augusta
-
 See the [LICENSE](./LICENSE) file for full details.
